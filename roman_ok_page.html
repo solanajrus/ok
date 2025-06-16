@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OK</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        .container {
+            width: 100%;
+            height: 100vh;
+            min-height: 500px;
+            position: relative;
+            background-color: white;
+            font-family: serif;
+            overflow: hidden;
+        }
+        
+        .ca-box {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #f0f0f0;
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: black;
+            z-index: 100;
+        }
+        
+        .roman-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            color: black;
+            font-weight: normal;
+            z-index: 100;
+        }
+        
+        .bouncing-text {
+            position: absolute;
+            font-size: 1.5rem;
+            color: #666;
+            opacity: 0.6;
+            white-space: nowrap;
+            pointer-events: none;
+            user-select: none;
+            font-family: serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="mainContainer">
+        <div class="ca-box">CA:</div>
+        <div class="roman-text">OK.</div>
+    </div>
+    
+    <script>
+        (function() {
+            const container = document.getElementById('mainContainer');
+            
+            class BouncingText {
+                constructor(text, x, y, vx, vy) {
+                    this.element = document.createElement('div');
+                    this.element.className = 'bouncing-text';
+                    this.element.textContent = text;
+                    this.element.style.left = x + 'px';
+                    this.element.style.top = y + 'px';
+                    container.appendChild(this.element);
+                    
+                    this.x = x;
+                    this.y = y;
+                    this.vx = vx;
+                    this.vy = vy;
+                    
+                    // Wait for element to be in DOM to get dimensions
+                    setTimeout(() => {
+                        this.width = this.element.offsetWidth;
+                        this.height = this.element.offsetHeight;
+                    }, 100);
+                }
+                
+                update() {
+                    if (!this.width || !this.height) return;
+                    
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    
+                    const containerWidth = container.offsetWidth;
+                    const containerHeight = container.offsetHeight;
+                    
+                    if (this.x <= 0 || this.x + this.width >= containerWidth) {
+                        this.vx = -this.vx;
+                        this.x = Math.max(0, Math.min(this.x, containerWidth - this.width));
+                    }
+                    
+                    if (this.y <= 0 || this.y + this.height >= containerHeight) {
+                        this.vy = -this.vy;
+                        this.y = Math.max(0, Math.min(this.y, containerHeight - this.height));
+                    }
+                    
+                    this.element.style.left = this.x + 'px';
+                    this.element.style.top = this.y + 'px';
+                }
+            }
+            
+            const bouncingTexts = [];
+            
+            function initializeTexts() {
+                const containerWidth = container.offsetWidth;
+                const containerHeight = container.offsetHeight;
+                
+                // Create multiple bouncing text elements
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * (containerWidth - 250);
+                    const y = Math.random() * (containerHeight - 80);
+                    const vx = (Math.random() - 0.5) * 1.5;
+                    const vy = (Math.random() - 0.5) * 1.5;
+                    
+                    bouncingTexts.push(new BouncingText('Everything will be...', x, y, vx, vy));
+                }
+            }
+            
+            function animate() {
+                bouncingTexts.forEach(text => text.update());
+                requestAnimationFrame(animate);
+            }
+            
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(initializeTexts, 500);
+                    animate();
+                });
+            } else {
+                setTimeout(initializeTexts, 500);
+                animate();
+            }
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                // Optionally reinitialize on resize
+                // This prevents text from getting stuck outside bounds
+            });
+        })();
+    </script>
+</body>
+</html>
